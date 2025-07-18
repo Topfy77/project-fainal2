@@ -20,6 +20,10 @@ exports.deleteUser = (id, callback) => {
   db.query("DELETE FROM user WHERE user_id = ?", [id], callback);
 };
 
-exports.getUserByUsername = (username, callback) => {
-  db.query("SELECT * FROM user WHERE username = ?", [username], callback);
+exports.getUserByEmail = (Email, callback) => {
+  db.query("SELECT * FROM user WHERE email = ?", [Email], callback);
 };
+
+
+
+

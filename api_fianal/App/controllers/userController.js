@@ -1,4 +1,6 @@
 const User = require("../models/userModel");
+const jwt = require("jsonwebtoken");
+const SECRET_KEY = "your_secret_key"; // ควรเก็บใน .env
 
 exports.getAll = (req, res) => {
   User.getAllUsers((err, result) => {
@@ -37,24 +39,34 @@ exports.delete = (req, res) => {
 
 exports.login = (req, res) => {
   try {
-    const { username, password } = req.body;
-    if (!username || !password) {
-      return res.status(400).json({ success: false, message: "กรุณากรอก username และ password" });
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: "กรุณากรอกอีเมลและรหัสผ่าน" });
     }
 
-    User.getUserByUsername(username, (err, result) => {
+    User.getUserByEmail(email, (err, result) => {
       if (err) {
         console.error("Database error:", err);
         return res.status(500).json({ success: false, message: "Server error" });
       }
+
       if (!result || result.length === 0) {
-        return res.status(401).json({ success: false, message: "ชื่อผู้ใช้ไม่ถูกต้อง" });
+        return res.status(401).json({ success: false, message: "อีเมลไม่ถูกต้อง" });
       }
 
       const user = result[0];
       if (user.password === password) {
-        return res.json({ success: true, user });
+        // สร้าง JWT token
+        const payload = { id: user.id, email: user.email };
+        const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
+
+        // ตัด password ออกก่อนส่งกลับ
+        const { password, ...userWithoutPassword } = user;
+
+        return res.json({ success: true, token, user: userWithoutPassword });
       }
+
       return res.status(401).json({ success: false, message: "รหัสผ่านไม่ถูกต้อง" });
     });
   } catch (error) {
