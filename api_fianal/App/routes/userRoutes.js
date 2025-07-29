@@ -1,13 +1,15 @@
-
 const express = require("express");
 const router = express.Router();
 const user = require("../controllers/userController");
 
-// ✅ ตรวจให้ชัวร์ว่า user.login เป็นฟังก์ชัน
+// ✅ เพิ่มบรรทัดนี้เข้าไปด้านบน
+router.post("/register", user.create); // ✅ <- สำคัญที่สุด
+
+// ที่เหลือคงเดิม
 router.post("/login", user.login);
 router.get("/", user.getAll);
 router.get("/:id", user.getById);
-router.post("/", user.create);
+ // << ไม่จำเป็นถ้าใช้ /register
 router.put("/:id", user.update);
 router.delete("/:id", user.delete);
 

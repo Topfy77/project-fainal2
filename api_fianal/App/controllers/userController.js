@@ -1,6 +1,6 @@
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
-const SECRET_KEY = "your_secret_key"; // ควรเก็บใน .env
+const SECRET_KEY = "your_secret_key"; // แนะนำให้เก็บในไฟล์ .env และอ่านค่าออกมา
 
 exports.getAll = (req, res) => {
   User.getAllUsers((err, result) => {
@@ -72,5 +72,19 @@ exports.login = (req, res) => {
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+exports.register = async (req, res) => {
+  const { username, password, email, tel } = req.body;
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    User.createUser({ username, password: hashedPassword, email, tel }, (err, result) => {
+      if (err) return res.status(500).json({ message: "Register failed", error: err });
+      res.status(201).json({ message: "Register success", user_id: result.insertId });
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Error hashing password", error: err });
   }
 };

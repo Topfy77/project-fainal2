@@ -19,3 +19,6 @@ exports.updateProduct = (id, data, callback) => {
 exports.deleteProduct = (id, callback) => {
   db.query("DELETE FROM product WHERE pro_id = ?", [id], callback);
 };
+exports.getProductsByUserId = (userId, callback) => {
+  db.query("SELECT * FROM product WHERE user_id = ?", [userId], callback);
+};

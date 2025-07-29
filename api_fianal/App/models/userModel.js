@@ -24,6 +24,12 @@ exports.getUserByEmail = (Email, callback) => {
   db.query("SELECT * FROM user WHERE email = ?", [Email], callback);
 };
 
+exports.createUser = (user, callback) => {
+  const { username, password, email, tel } = user;
+  const sql = `INSERT INTO user (username, password, email, tel) VALUES (?, ?, ?, ?)`;
+  db.query(sql, [username, password, email, tel], callback);
+};
+
 
 
 
