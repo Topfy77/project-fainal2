@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/api_service.dart';
 import '../widgets/product_card.dart';
+import 'product_detail_screen.dart';
 
 class AllProductsScreen extends StatefulWidget {
   @override
@@ -19,50 +20,72 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
   @override
   Widget build(BuildContext context) {
     final apiService = Provider.of<ApiService>(context);
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('All Products', style: TextStyle(color: Colors.white, fontSize: 22)),
-        backgroundColor: Colors.blue[800],
-        elevation: 6,
+        title: const Text('All Products', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.deepPurple,
+        elevation: 4,
       ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blue[100]!, Colors.white],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
+        color: Colors.grey[100],
         child: apiService.isLoading
-            ? Center(child: CircularProgressIndicator(color: Colors.blue[700]))
+            ? const Center(child: CircularProgressIndicator(color: Colors.deepPurple))
             : apiService.products.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.inventory_2, size: 80, color: Colors.blue[300]),
-                        SizedBox(height: 15),
+                      children: const [
+                        Icon(Icons.inventory_2, size: 60, color: Colors.grey),
+                        SizedBox(height: 10),
                         Text(
                           'No products available',
-                          style: TextStyle(fontSize: 20, color: Colors.blue[600], fontWeight: FontWeight.w500),
+                          style: TextStyle(fontSize: 18, color: Colors.grey, fontWeight: FontWeight.w500),
                         ),
                       ],
                     ),
                   )
-                : ListView.builder(
-                    padding: EdgeInsets.all(10),
+                : GridView.builder(
+                    padding: const EdgeInsets.all(12),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: screenWidth < 600 ? 2 : 4,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 0.7, // ปรับให้พอดีกับรูป+ข้อความแนวตั้ง
+                    ),
                     itemCount: apiService.products.length,
                     itemBuilder: (context, index) {
                       final product = apiService.products[index];
-                      return Card(
-                        elevation: 5,
-                        margin: EdgeInsets.symmetric(vertical: 8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        child: ProductCard(
-                          product: product,
-                          onDelete: null,
-                          onEdit: null,
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProductDetailScreen(product: product),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 6,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(8),
+                          child: ProductCard(
+                            product: product,
+                            onDelete: null,
+                            onEdit: null,
+                            onBuy: null,
+                          ),
                         ),
                       );
                     },
