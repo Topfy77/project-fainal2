@@ -3,9 +3,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as path;
-import 'package:flutter/foundation.dart' as foundation; // เพิ่มการ import นี้
-import 'dart:html' as html; // สำหรับ Web
-import 'dart:typed_data'; // เพิ่มการ import นี้สำหรับ Uint8List
+import 'package:flutter/foundation.dart' as foundation;
+import 'dart:html' as html;
+import 'dart:typed_data';
 import '../models/product.dart';
 
 class ApiService with ChangeNotifier {
@@ -32,7 +32,8 @@ class ApiService with ChangeNotifier {
         final data = jsonDecode(response.body);
         if (data['success']) {
           _token = data['token'];
-          _userId = data['user']['user_id'];
+          _userId = data['user']?['user_id']; // ใช้ ? เพื่อป้องกัน null
+          print('Login successful - User ID: $_userId, Token: $_token');
           notifyListeners();
         } else {
           throw Exception(data['message'] ?? 'Login failed');
@@ -50,7 +51,10 @@ class ApiService with ChangeNotifier {
   }
 
   Future<void> fetchAllProducts() async {
-    if (_token == null) return;
+    if (_token == null) {
+      print('Token is null, cannot fetch all products');
+      return;
+    }
     _isLoading = true;
     notifyListeners();
     try {
@@ -64,6 +68,7 @@ class ApiService with ChangeNotifier {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as List;
         _products = data.map((json) => Product.fromJson(json)).toList();
+        print('Fetched all products: ${_products.length} items');
       } else {
         throw Exception('Failed to fetch all products: ${response.statusCode} - ${response.body}');
       }
@@ -76,7 +81,10 @@ class ApiService with ChangeNotifier {
   }
 
   Future<void> fetchMyProducts() async {
-    if (_token == null || _userId == null) return;
+    if (_token == null || _userId == null) {
+      print('Token or User ID is null, cannot fetch my products');
+      return;
+    }
     _isLoading = true;
     notifyListeners();
     try {
@@ -90,6 +98,7 @@ class ApiService with ChangeNotifier {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as List;
         _products = data.map((json) => Product.fromJson(json)).toList();
+        print('Fetched my products: ${_products.length} items for user $_userId');
       } else {
         throw Exception('Failed to fetch my products: ${response.statusCode} - ${response.body}');
       }
@@ -102,7 +111,10 @@ class ApiService with ChangeNotifier {
   }
 
   Future<void> addProduct(String proName, int proPrice, int proQty, dynamic photo) async {
-    if (_token == null || _userId == null) return;
+    if (_token == null || _userId == null) {
+      print('Token or User ID is null, cannot add product');
+      return;
+    }
     _isLoading = true;
     notifyListeners();
     try {
@@ -121,11 +133,11 @@ class ApiService with ChangeNotifier {
           final reader = html.FileReader();
           reader.readAsArrayBuffer(photo);
           await reader.onLoad.first;
-          final bytes = reader.result as Uint8List; // ใช้ Uint8List ได้หลัง import
+          final bytes = reader.result as Uint8List;
           request.files.add(http.MultipartFile.fromBytes(
             'photo',
             bytes,
-            filename: photo.name, // ใช้ชื่อไฟล์จาก html.File
+            filename: photo.name ?? 'uploaded_image.jpg',
           ));
         } else {
           request.files.add(await http.MultipartFile.fromPath(
@@ -155,7 +167,10 @@ class ApiService with ChangeNotifier {
   }
 
   Future<void> updateProduct(int proId, String proName, int proPrice, int proQty, dynamic photo) async {
-    if (_token == null || _userId == null) return;
+    if (_token == null || _userId == null) {
+      print('Token or User ID is null, cannot update product');
+      return;
+    }
     _isLoading = true;
     notifyListeners();
     try {
@@ -174,11 +189,11 @@ class ApiService with ChangeNotifier {
           final reader = html.FileReader();
           reader.readAsArrayBuffer(photo);
           await reader.onLoad.first;
-          final bytes = reader.result as Uint8List; // ใช้ Uint8List ได้หลัง import
+          final bytes = reader.result as Uint8List;
           request.files.add(http.MultipartFile.fromBytes(
             'photo',
             bytes,
-            filename: photo.name,
+            filename: photo.name ?? 'uploaded_image.jpg',
           ));
         } else {
           request.files.add(await http.MultipartFile.fromPath(
@@ -207,7 +222,10 @@ class ApiService with ChangeNotifier {
   }
 
   Future<void> deleteProduct(int proId) async {
-    if (_token == null || _userId == null) return;
+    if (_token == null || _userId == null) {
+      print('Token or User ID is null, cannot delete product');
+      return;
+    }
     _isLoading = true;
     notifyListeners();
     try {

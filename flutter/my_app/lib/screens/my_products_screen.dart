@@ -26,7 +26,8 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
   @override
   void initState() {
     super.initState();
-    Provider.of<ApiService>(context, listen: false).fetchMyProducts();
+    final apiService = Provider.of<ApiService>(context, listen: false);
+    apiService.fetchMyProducts(); // ดึงสินค้าของผู้ใช้
   }
 
   Future<void> _pickImage() async {
@@ -67,7 +68,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
         await apiService.updateProduct(_editingProductId!, name, price, qty, _photo);
       }
       _resetForm();
-      apiService.fetchMyProducts();
+      await apiService.fetchMyProducts(); // รีเฟรชข้อมูลหลังบันทึก
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Product saved')));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
@@ -85,10 +86,10 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
 
   void _showEditDialog(Product product) {
     _editingProductId = product.proId;
-    _nameController.text = product.proName;
-    _priceController.text = product.proPrice.toString();
-    _qtyController.text = product.proQty.toString();
-    _photo = null; // โหลดรูปจาก backend ไม่รองรับ file preview ตรง
+    _nameController.text = product.proName ?? '';
+    _priceController.text = (product.proPrice ?? 0).toString();
+    _qtyController.text = (product.proQty ?? 0).toString();
+    _photo = null;
 
     showDialog(
       context: context,
@@ -163,7 +164,13 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
   @override
   Widget build(BuildContext context) {
     final apiService = Provider.of<ApiService>(context);
-    final products = apiService.products;
+    final userId = apiService.userId;
+    final products = apiService.products ?? []; // ใช้ลิสต์ว่างถ้า products เป็น null
+
+    // กรองสินค้าตาม userId
+    final filteredProducts = userId != null
+        ? products.where((product) => product.userId == userId).toList()
+        : [];
 
     return Scaffold(
       appBar: AppBar(
@@ -175,27 +182,29 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
         child: Column(
           children: [
             Expanded(
-              child: products.isEmpty
+              child: filteredProducts.isEmpty
                   ? Center(child: Text('No products available', style: GoogleFonts.roboto(fontSize: 18)))
                   : ListView.builder(
-                      itemCount: products.length,
+                      itemCount: filteredProducts.length,
                       itemBuilder: (_, index) {
-                        final product = products[index];
+                        final product = filteredProducts[index];
+                        print('Rendering product: ${product.proName} (ID: ${product.proId})'); // ดีบัก
                         return Card(
                           margin: EdgeInsets.symmetric(vertical: 8),
                           elevation: 4,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           child: ProductCard(
                             product: product,
-                            onEdit: () => _showEditDialog(product),
+                            onEdit: () => _showEditDialog(product), // ฟังก์ชันแก้ไข
                             onDelete: () async {
                               try {
-                                await apiService.deleteProduct(product.proId);
+                                await apiService.deleteProduct(product.proId); // ฟังก์ชันลบ
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(SnackBar(content: Text('Product deleted')));
-                                apiService.fetchMyProducts();
+                                await apiService.fetchMyProducts(); // รีเฟรชหลังลบ
                               } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(content: Text('Error: $e')));
                               }
                             },
                           ),
