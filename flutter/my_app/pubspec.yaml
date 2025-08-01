@@ -1,0 +1,24 @@
+name: code_marketplace
+description: A new Flutter project.
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.1
+  provider: ^6.1.1
+  image_picker: ^0.8.5+3
+  path: ^1.8.0
+  flutter_spinkit: ^5.1.0
+  flutter_material_pickers: ^3.6.0
+  google_fonts: ^6.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

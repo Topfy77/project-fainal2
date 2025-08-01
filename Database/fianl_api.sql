@@ -28,11 +28,12 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `product` (
-  `pro_id` int(11) NOT NULL,
-  `pro_name` varchar(50) NOT NULL,
-  `pro_price` int(11) NOT NULL,
-  `pro_qty` int(50) NOT NULL,
-  `photo` varchar(50) NOT NULL
+  `pro_id` INT NOT NULL AUTO_INCREMENT,
+  `pro_name` VARCHAR(50) NOT NULL,
+  `pro_price` INT NOT NULL,
+  `pro_qty` INT NOT NULL,
+  `photo` VARCHAR(50) NOT NULL,
+  PRIMARY KEY (`pro_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -49,13 +50,15 @@ INSERT INTO `product` (`pro_id`, `pro_name`, `pro_price`, `pro_qty`, `photo`) VA
 --
 
 CREATE TABLE `user` (
-  `user_id` int(11) NOT NULL,
-  `username` varchar(50) NOT NULL,
-  `password` varchar(50) NOT NULL,
-  `Email` varchar(50) NOT NULL,
-  `Tel` int(11) NOT NULL,
-  `address` varchar(50) NOT NULL
+  `user_id` INT NOT NULL AUTO_INCREMENT,
+  `username` VARCHAR(50) NOT NULL,
+  `password` VARCHAR(50) NOT NULL,
+  `Email` VARCHAR(50) NOT NULL,
+  `Tel` VARCHAR(20) NOT NULL,
+  `address` VARCHAR(50) NOT NULL,
+  PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 --
 -- Dumping data for table `user`
