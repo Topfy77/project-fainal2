@@ -33,6 +33,7 @@ class ApiService with ChangeNotifier {
         if (data['success']) {
           _token = data['token'];
           _userId = data['user']?['user_id']; // ใช้ ? เพื่อป้องกัน null
+          _username = data['user']['username'] ?? email; // เพิ่มการกำหนด username
           print('Login successful - User ID: $_userId, Token: $_token');
           notifyListeners();
         } else {
